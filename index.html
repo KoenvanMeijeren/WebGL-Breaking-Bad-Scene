@@ -10,7 +10,25 @@
     </style>
 </head>
 <body>
+    <div>
+        <button onclick="changeCubeMaterial(0)">Default cube</button>
+        <button onclick="changeCubeMaterial(1)">Red cube</button>
+        <button onclick="changeCubeMaterial(2)">Front red cube</button>
+        <button onclick="changeCubeMaterial(3)">Front dark red cube</button>
+        <button onclick="changeCubeMaterial(4)">Lower opacity cube</button>
+        <button onclick="changeCubeMaterial(5)">Wireframe cube</button>
+        <button onclick="addLight()">Add light</button>
+        <button onclick="rotateCube()">Rotate cube</button>
+        <button onclick="movingCamera()">Moving camera</button>
+        <button onclick="resetScene()">Reset</button>
+    </div>
+
+    <div class="scene-container" style="border: black solid 10px; width: 80%; height: 80vh; margin-top: 10px; margin-left: auto; margin-right: auto">
+
+    </div>
+
     <script src="three/three.js"></script>
     <script src="scene.js"></script>
+    <script src="movingCameraSceneByMouse.js"></script>
 </body>
 </html>
