@@ -6,7 +6,7 @@ const camera = new THREE.PerspectiveCamera(
     75,     // fov - Camera frustum vertical field of view
     window.innerWidth / window.innerHeight, // aspect - Camera frustum aspect ratio
     0.1,   // near - Camera frustum near plane
-    1000); // far - Camera frustum far plane
+    5000); // far - Camera frustum far plane
 // Far clipping plane above will not work, because skybox is 5000x5000x5000. Try 2500
 
 // Create renderer
