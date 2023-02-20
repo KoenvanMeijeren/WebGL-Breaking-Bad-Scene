@@ -147,24 +147,24 @@ function animateFlyingFlamingo() {
     }
 }
 
-function createTumbleWeed(x, z) {
+function createTumbleweed(x, z) {
     const geometry = new THREE.SphereGeometry(hayBaleScale, 12, 12);
     const colorMap = textureLoader.load("assets/tumbleweed.png");
     const material  = new THREE.MeshBasicMaterial({ map: colorMap });
 
-    const tumbleWeed = new THREE.Mesh(geometry, material);
-    tumbleWeed.position.x = x;
-    tumbleWeed.position.y = 0.7;
-    tumbleWeed.position.z = z;
-    scene.add(tumbleWeed);
+    const tumbleweed = new THREE.Mesh(geometry, material);
+    tumbleweed.position.x = x;
+    tumbleweed.position.y = 0.7;
+    tumbleweed.position.z = z;
+    scene.add(tumbleweed);
 }
 
-function spreadTumbleWeeds() {
+function spreadTumbleweeds() {
     for (let xPositionIndex = -tumbleWeedSpreadRadius; xPositionIndex < tumbleWeedSpreadRadius; xPositionIndex = xPositionIndex + 10) {
         for (let yPositionIndex = -tumbleWeedSpreadRadius; yPositionIndex < tumbleWeedSpreadRadius; yPositionIndex = yPositionIndex + 10) {
             let randomNum = Math.random() * 20 - 10;
             let randomNum2 = Math.random() * 20 - 10;
-            createTumbleWeed(xPositionIndex + randomNum, yPositionIndex + randomNum2);
+            createTumbleweed(xPositionIndex + randomNum, yPositionIndex + randomNum2);
         }
     }
 }
@@ -185,4 +185,4 @@ const render = function () {
 
 render();
 spreadCactus();
-spreadTumbleWeeds();
+spreadTumbleweeds();
