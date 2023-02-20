@@ -9,6 +9,7 @@ const camera = new THREE.PerspectiveCamera(
 
 // Settings
 const skyBoxScale = 2500,
+    roadLength = 500,
     floorScale = 500,
     floorRepeats = 100,
     cactusSpreadRadius = 250,
@@ -45,12 +46,30 @@ const materialSand = new THREE.MeshBasicMaterial({map: textureSand});
 const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
 
 let skyBoxMaterials = [];
-skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_ft.jpg'), side: THREE.BackSide}));
-skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_bk.jpg'), side: THREE.BackSide}));
-skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_up.jpg'), side: THREE.BackSide}));
-skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_dn.jpg'), side: THREE.BackSide}));
-skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_rt.jpg'), side: THREE.BackSide}));
-skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_lf.jpg'), side: THREE.BackSide}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({
+    map: textureLoader.load('assets/sky/sky_ft.jpg'),
+    side: THREE.BackSide
+}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({
+    map: textureLoader.load('assets/sky/sky_bk.jpg'),
+    side: THREE.BackSide
+}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({
+    map: textureLoader.load('assets/sky/sky_up.jpg'),
+    side: THREE.BackSide
+}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({
+    map: textureLoader.load('assets/sky/sky_dn.jpg'),
+    side: THREE.BackSide
+}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({
+    map: textureLoader.load('assets/sky/sky_rt.jpg'),
+    side: THREE.BackSide
+}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({
+    map: textureLoader.load('assets/sky/sky_lf.jpg'),
+    side: THREE.BackSide
+}));
 
 let skyboxGeometry = new THREE.BoxGeometry(skyBoxScale, skyBoxScale, skyBoxScale);
 let skybox = new THREE.Mesh(skyboxGeometry, skyBoxMaterials);
@@ -59,6 +78,18 @@ scene.add(skybox);
 const floorGeometry = new THREE.BoxGeometry(floorScale, 1, floorScale);
 const floor = new THREE.Mesh(floorGeometry, materialSand);
 scene.add(floor);
+
+const textureRoad = textureLoader.load('assets/road.jpg', function (texture) {
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, roadLength);
+});
+const materialRoad = new THREE.MeshBasicMaterial({map: textureRoad});
+const roadGeometry = new THREE.BoxGeometry(2, 0.1, roadLength);
+const road = new THREE.Mesh(roadGeometry, materialRoad);
+road.position.x = 5;
+road.position.y = 0.5;
+road.position.z = 10;
+scene.add(road);
 
 function createCactus(x, z) {
     const cactusStem = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 7);
@@ -150,7 +181,7 @@ function animateFlyingFlamingo() {
 function createTumbleweed(x, z) {
     const geometry = new THREE.SphereGeometry(hayBaleScale, 12, 12);
     const colorMap = textureLoader.load("assets/tumbleweed.png");
-    const material  = new THREE.MeshBasicMaterial({ map: colorMap });
+    const material = new THREE.MeshBasicMaterial({map: colorMap});
 
     const tumbleweed = new THREE.Mesh(geometry, material);
     tumbleweed.position.x = x;
@@ -172,14 +203,15 @@ function spreadTumbleweeds() {
 function createBuilding() {
     let houseGroup = new THREE.Group(); //Creating group
     houseGroup.position.set(-10, 3, -8); // set position of group (x-axis, y-axis, z-axis).
-// To add bricks for home
-    let geometry = new THREE.BoxGeometry(10,5,3); // To draw cube shape geometry.
+
+    // To add bricks for home
+    let geometry = new THREE.BoxGeometry(10, 5, 3); // To draw cube shape geometry.
     let mesh = new THREE.MeshBasicMaterial({color: 0x6e638a}); // Add color of cube for appearance of cube.
     let cube = new THREE.Mesh(geometry, mesh); //With mesh adding appearance of cube over it.
-    let edgeLine = new THREE.BoxBufferGeometry( 10, 5, 3 );
-    let edges = new THREE.EdgesGeometry( edgeLine ); // To have border of cube.
-    let line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) ); // Adding border around bricks
-    cube.position.set(0,0,4);
+    let edgeLine = new THREE.BoxBufferGeometry(10, 5, 3);
+    let edges = new THREE.EdgesGeometry(edgeLine); // To have border of cube.
+    let line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({color: 0xffffff})); // Adding border around bricks
+    cube.position.set(0, 0, 4);
     line.position.copy(cube.position); //Copy of cube position since border need to be added around cube.
     // Adding line and brick to house group
     houseGroup.add(line);
@@ -188,7 +220,7 @@ function createBuilding() {
 
     // Note: Need to be added above renderer.render(scene, camera);
     //To add roof for home
-    let roof = new THREE.ConeGeometry(6,5,0);
+    let roof = new THREE.ConeGeometry(6, 5, 1);
     let roofMaterial = new THREE.MeshBasicMaterial({color: 0xd1d665});
     let roofMesh = new THREE.Mesh(roof, roofMaterial);
     roofMesh.position.set(-1.3, 5, 1);
@@ -196,10 +228,10 @@ function createBuilding() {
 
     // Need to be added after code for roof of house.
     //To add door for home
-    let door = new THREE.PlaneBufferGeometry(2,3,2);
+    let door = new THREE.PlaneBufferGeometry(2, 3, 2);
     let doorMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
     let doorMesh = new THREE.Mesh(door, doorMaterial);
-    doorMesh.position.set(1,-0.75,7);
+    doorMesh.position.set(1, -0.75, 7);
     houseGroup.add(doorMesh);
 }
 
