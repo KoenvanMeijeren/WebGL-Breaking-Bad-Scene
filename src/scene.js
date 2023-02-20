@@ -171,7 +171,7 @@ function spreadTumbleweeds() {
 
 function createBuilding() {
     let houseGroup = new THREE.Group(); //Creating group
-    houseGroup.position.set(-10, 0, -8); // set position of group (x-axis, y-axis, z-axis).
+    houseGroup.position.set(-10, 3, -8); // set position of group (x-axis, y-axis, z-axis).
 // To add bricks for home
     let geometry = new THREE.BoxGeometry(10,5,3); // To draw cube shape geometry.
     let mesh = new THREE.MeshBasicMaterial({color: 0x6e638a}); // Add color of cube for appearance of cube.
