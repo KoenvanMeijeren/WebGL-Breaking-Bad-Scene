@@ -124,7 +124,7 @@ function animateFlyingFlamingo() {
     }
 
     if (!hasFlamingoReachedEnd && flamingo.position.x < flamingoEndPosition) {
-        flamingo.position.x += 0.2;
+        flamingo.position.x += 0.1;
     }
 
     if (flamingo.position.x > flamingoEndPosition) {
@@ -133,7 +133,7 @@ function animateFlyingFlamingo() {
     }
 
     if (hasFlamingoReachedEnd && flamingo.position.x > flamingoStartPosition) {
-        flamingo.position.x -= 0.2;
+        flamingo.position.x -= 0.1;
     }
 
     if (flamingo.position.x < flamingoStartPosition) {
