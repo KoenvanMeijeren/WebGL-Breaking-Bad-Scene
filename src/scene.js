@@ -12,10 +12,11 @@ const skyBoxScale = 2500,
     floorScale = 500,
     floorRepeats = 100,
     cactusSpreadRadius = 250,
+    tumbleWeedSpreadRadius = 100,
     flamingoStartPosition = -20,
-    flamingoEndPosition = 20;
+    flamingoEndPosition = 20,
+    hayBaleScale = 0.2;
 
-// Define light
 const light = new THREE.DirectionalLight(0xdddddd, 5);
 light.position.set(2, 4, 1);
 scene.add(light);
@@ -51,13 +52,13 @@ skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('asset
 skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_rt.jpg'), side: THREE.BackSide}));
 skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_lf.jpg'), side: THREE.BackSide}));
 
-let skyboxGeo = new THREE.BoxGeometry(skyBoxScale, skyBoxScale, skyBoxScale);
-let skybox = new THREE.Mesh(skyboxGeo, skyBoxMaterials);
+let skyboxGeometry = new THREE.BoxGeometry(skyBoxScale, skyBoxScale, skyBoxScale);
+let skybox = new THREE.Mesh(skyboxGeometry, skyBoxMaterials);
 scene.add(skybox);
 
-const geometry = new THREE.BoxGeometry(floorScale, 1, floorScale);
-const cube = new THREE.Mesh(geometry, materialSand);
-scene.add(cube);
+const floorGeometry = new THREE.BoxGeometry(floorScale, 1, floorScale);
+const floor = new THREE.Mesh(floorGeometry, materialSand);
+scene.add(floor);
 
 function createCactus(x, z) {
     const cactusStem = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 7);
@@ -146,6 +147,28 @@ function animateFlyingFlamingo() {
     }
 }
 
+function createTumbleWeed(x, z) {
+    const geometry = new THREE.SphereGeometry(hayBaleScale, 12, 12);
+    const colorMap = textureLoader.load("assets/tumbleweed.png");
+    const material  = new THREE.MeshBasicMaterial({ map: colorMap });
+
+    const tumbleWeed = new THREE.Mesh(geometry, material);
+    tumbleWeed.position.x = x;
+    tumbleWeed.position.y = 0.7;
+    tumbleWeed.position.z = z;
+    scene.add(tumbleWeed);
+}
+
+function spreadTumbleWeeds() {
+    for (let xPositionIndex = -tumbleWeedSpreadRadius; xPositionIndex < tumbleWeedSpreadRadius; xPositionIndex = xPositionIndex + 10) {
+        for (let yPositionIndex = -tumbleWeedSpreadRadius; yPositionIndex < tumbleWeedSpreadRadius; yPositionIndex = yPositionIndex + 10) {
+            let randomNum = Math.random() * 20 - 10;
+            let randomNum2 = Math.random() * 20 - 10;
+            createTumbleWeed(xPositionIndex + randomNum, yPositionIndex + randomNum2);
+        }
+    }
+}
+
 const render = function () {
     requestAnimationFrame(render);
     orbitControls.update();
@@ -162,3 +185,4 @@ const render = function () {
 
 render();
 spreadCactus();
+spreadTumbleWeeds();
