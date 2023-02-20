@@ -1,64 +1,164 @@
-// Create scene
 const scene = new THREE.Scene();
-
-// Create camera
+const clock = new THREE.Clock();
 const camera = new THREE.PerspectiveCamera(
     75,     // fov - Camera frustum vertical field of view
     window.innerWidth / window.innerHeight, // aspect - Camera frustum aspect ratio
     0.1,   // near - Camera frustum near plane
-    1000   // far - Camera frustum far plane
+    5000 // far - Camera frustum far plane
 );
 
-// Create renderer
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+// Settings
+const skyBoxScale = 2500,
+    floorScale = 500,
+    floorRepeats = 100,
+    cactusSpreadRadius = 250,
+    flamingoStartPosition = -20,
+    flamingoEndPosition = 20;
+
+// Define light
+const light = new THREE.DirectionalLight(0xdddddd, 5);
+light.position.set(2, 4, 1);
+scene.add(light);
+
+camera.position.x = 50;  // Move right from center of scene
+camera.position.y = 20;  // Move up from center of scene
+camera.position.z = 50;  // Move camera away from center of scene
+
+const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 renderer.setSize(window.innerWidth, window.innerHeight);
-const sceneContainer = document.getElementsByClassName('scene-container')[0];
-sceneContainer.innerHTML = "";
-sceneContainer.appendChild( renderer.domElement );
+document.body.appendChild(renderer.domElement);
 
-const materials = [];
-materials.push(new THREE.MeshNormalMaterial());
-materials.push(new THREE.MeshBasicMaterial({ color: 0xad0000 }));
-materials.push(new THREE.MeshPhongMaterial({ color: 0xad0000 , shininess: 100 }));
-materials.push(new THREE.MeshLambertMaterial({color: 0xad0000, shininess: 100 }));
-materials.push(new THREE.MeshBasicMaterial({ color: 0xad0000, transparent: true, opacity:.2 }));
-materials.push(new THREE.MeshBasicMaterial({ color: 0xad0000, wireframe: true }));
+const textureLoader = new THREE.TextureLoader();
+const gltfLoader = new THREE.GLTFLoader();
+const animationMixers = [];
 
-const geometry = new THREE.BoxGeometry(1,1,1);
-const cube = new THREE.Mesh(geometry, materials[0]);
+const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+orbitControls.noKeys = true;
+orbitControls.maxDistance = 20;
+
+const textureSand = textureLoader.load('assets/sand.jpg');
+textureSand.wrapS = textureSand.wrapT = THREE.RepeatWrapping;
+textureSand.repeat.set(floorRepeats, floorRepeats);
+const textureCactus = textureLoader.load('assets/cactus.jpg');
+const materialSand = new THREE.MeshBasicMaterial({map: textureSand});
+const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
+
+let skyBoxMaterials = [];
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_ft.jpg'), side: THREE.BackSide}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_bk.jpg'), side: THREE.BackSide}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_up.jpg'), side: THREE.BackSide}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_dn.jpg'), side: THREE.BackSide}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_rt.jpg'), side: THREE.BackSide}));
+skyBoxMaterials.push(new THREE.MeshBasicMaterial({map: textureLoader.load('assets/sky/sky_lf.jpg'), side: THREE.BackSide}));
+
+let skyboxGeo = new THREE.BoxGeometry(skyBoxScale, skyBoxScale, skyBoxScale);
+let skybox = new THREE.Mesh(skyboxGeo, skyBoxMaterials);
+scene.add(skybox);
+
+const geometry = new THREE.BoxGeometry(floorScale, 1, floorScale);
+const cube = new THREE.Mesh(geometry, materialSand);
 scene.add(cube);
 
-// Move camera from center
-camera.position.x = 2; // move right from center of scene
-camera.position.y = 1; // move up from center of scene
-camera.position.z = 5; // move camera away from center of scene
+function createCactus(x, z) {
+    const cactusStem = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 7);
+    const cactusStemMesh = new THREE.Mesh(cactusStem, materialCactus)
+    cactusStemMesh.position.x = x;
+    cactusStemMesh.position.y = 1.2;
+    cactusStemMesh.position.z = z;
 
-renderer.render(scene, camera);
+    const cactusTop = new THREE.IcosahedronGeometry(0.2, 1)
+    const cactusTopMesh = new THREE.Mesh(cactusTop, materialCactus)
+    cactusTopMesh.position.x = x;
+    cactusTopMesh.position.y = 1.95;
+    cactusTopMesh.position.z = z;
 
-const clock = new THREE.Clock();
+    scene.add(cactusStemMesh);
+    scene.add(cactusTopMesh);
+}
 
-const rotateCube = function () {
-    requestAnimationFrame(rotateCube);
+function spreadCactus() {
+    for (let xPositionIndex = -cactusSpreadRadius; xPositionIndex < cactusSpreadRadius; xPositionIndex = xPositionIndex + 25) {
+        for (let yPositionIndex = -cactusSpreadRadius; yPositionIndex < cactusSpreadRadius; yPositionIndex = yPositionIndex + 25) {
+            let randomNum = Math.random() * 20 - 10;
+            let randomNum2 = Math.random() * 20 - 10;
+            createCactus(xPositionIndex + randomNum, yPositionIndex + randomNum2);
+        }
+    }
+}
+
+gltfLoader.load("assets/models/rv.glb", function (gltf) {
+    gltf.scene.position.y = 0.5;
+    scene.add(gltf.scene);
+});
+
+gltfLoader.load("assets/models/walter.glb", function (gltf) {
+    gltf.scene.scale.set(2, 2, 2);
+    gltf.scene.rotation.x = 3.1
+    gltf.scene.position.y = 0.65;
+    gltf.scene.position.z = 5;
+    scene.add(gltf.scene);
+});
+
+var flamingo = null;
+gltfLoader.load('assets/models/Flamingo.glb', function (gltf) {
+    flamingo = gltf.scene.children[0];
+
+    const scale = 0.01;
+    flamingo.scale.set(scale, scale, scale);
+    flamingo.position.x = 3;
+    flamingo.position.y = 6;
+    flamingo.position.z = 0;
+    flamingo.rotation.y = 1.5;
+    scene.add(flamingo);
+
+    const mixer = new THREE.AnimationMixer(flamingo);
+    mixer.clipAction(gltf.animations[0]).setDuration(1).play();
+    animationMixers.push(mixer);
+});
+
+let hasFlamingoReachedEnd = false, hasFlamingoReachedStart = false;
+function animateFlyingFlamingo() {
+    if (flamingo == null) {
+        return;
+    }
+
+    if (!hasFlamingoReachedEnd && flamingo.position.x < flamingoEndPosition) {
+        flamingo.position.x += 0.2;
+    }
+
+    if (flamingo.position.x > flamingoEndPosition) {
+        hasFlamingoReachedEnd = true;
+        flamingo.rotation.y = -1.5;
+    }
+
+    if (hasFlamingoReachedEnd && flamingo.position.x > flamingoStartPosition) {
+        flamingo.position.x -= 0.2;
+    }
+
+    if (flamingo.position.x < flamingoStartPosition) {
+        hasFlamingoReachedStart = true;
+        flamingo.rotation.y = 1.5;
+    }
+
+    if (hasFlamingoReachedStart && hasFlamingoReachedEnd) {
+        hasFlamingoReachedStart = false;
+        hasFlamingoReachedEnd = false;
+    }
+}
+
+const render = function () {
+    requestAnimationFrame(render);
+    orbitControls.update();
+
+    // Run the animations.
+    animateFlyingFlamingo();
     const delta = clock.getDelta();
-
-    cube.rotation.x += 3.2 * delta;
-    cube.rotation.y += 3.2 * delta;
+    for (let index = 0; index < animationMixers.length; index++) {
+        animationMixers[index].update(delta);
+    }
 
     renderer.render(scene, camera);
 }
 
-const changeCubeMaterial = function (index) {
-    cube.material = materials[index];
-    renderer.render(scene, camera);
-}
-
-const addLight = function () {
-    const light = new THREE.DirectionalLight(0xdddd00, 1);
-    light.position.set(0, 0, 1 );
-    scene.add(light);
-    renderer.render(scene, camera);
-}
-
-const resetScene = function () {
-    window.location.reload();
-}
+render();
+spreadCactus();
