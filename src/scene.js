@@ -10,17 +10,40 @@ const camera = new THREE.PerspectiveCamera(
 // Settings
 const skyBoxScale = 2500,
     roadLength = 1000,
-    floorScale = 1000,
-    floorRepeats = 200,
+    shadowMapSize = 2048,
+    shadowDistance = 50,
+    floorScale = 10000,
+    floorRepeats = 1000,
     cactusSpreadRadius = 500,
     tumbleWeedSpreadRadius = 500,
     flamingoStartPosition = -20,
     flamingoEndPosition = 20,
     hayBaleScale = 0.2;
 
-const light = new THREE.DirectionalLight(0xdddddd, 5);
-light.position.set(2, 4, 1);
-scene.add(light);
+// LIGHTS
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
+hemiLight.color.setHSL(0.6, 1, 0.6);
+hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+hemiLight.position.set(0, 50, 0);
+scene.add(hemiLight);
+scene.add(new THREE.HemisphereLightHelper(hemiLight, 10));
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.color.setHSL(0.1, 1, 0.95);
+dirLight.position.set(-1, 1.75, 1);
+dirLight.position.multiplyScalar(30);
+scene.add(dirLight);
+
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = shadowMapSize;
+dirLight.shadow.mapSize.height = shadowMapSize;
+dirLight.shadow.camera.left = -shadowDistance;
+dirLight.shadow.camera.right = shadowDistance;
+dirLight.shadow.camera.top = shadowDistance;
+dirLight.shadow.camera.bottom = -shadowDistance;
+dirLight.shadow.camera.far = 3500;
+dirLight.shadow.bias = -0.0001;
+scene.add(new THREE.DirectionalLightHelper(dirLight, 10));
 
 camera.position.x = 50;  // Move right from center of scene
 camera.position.y = 20;  // Move up from center of scene
@@ -28,7 +51,18 @@ camera.position.z = 50;  // Move camera away from center of scene
 
 const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
+
+const cubeScale = 2;
+const geometry = new THREE.BoxGeometry(cubeScale, cubeScale, cubeScale);
+const material = new THREE.MeshPhongMaterial({color: 0x235324});
+const cube = new THREE.Mesh(geometry, material);
+cube.position.x = 5;
+cube.position.y = 5;
+cube.position.z = 5;
+cube.castShadow = true;
+scene.add(cube);
 
 const textureLoader = new THREE.TextureLoader();
 const gltfLoader = new THREE.GLTFLoader();
@@ -40,12 +74,20 @@ orbitControls.maxPolarAngle = Math.PI / 2 - 0.15;
 orbitControls.minDistance = 4;
 orbitControls.maxDistance = 20;
 
+// GROUND
 const textureSand = textureLoader.load('assets/sand.jpg');
 textureSand.wrapS = textureSand.wrapT = THREE.RepeatWrapping;
 textureSand.repeat.set(floorRepeats, floorRepeats);
-const textureCactus = textureLoader.load('assets/cactusNew.jpg');
-const materialSand = new THREE.MeshBasicMaterial({map: textureSand});
-const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
+
+const groundGeo = new THREE.PlaneGeometry(floorScale, floorScale);
+const groundMat = new THREE.MeshLambertMaterial({map: textureSand});
+groundMat.color.setHSL(0.095, 1, 0.75);
+
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.position.y = 0;
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
 
 let skyBoxMaterials = [];
 skyBoxMaterials.push(new THREE.MeshBasicMaterial({
@@ -77,22 +119,21 @@ let skyboxGeometry = new THREE.BoxGeometry(skyBoxScale, skyBoxScale, skyBoxScale
 let skybox = new THREE.Mesh(skyboxGeometry, skyBoxMaterials);
 scene.add(skybox);
 
-const floorGeometry = new THREE.BoxGeometry(floorScale, 1, floorScale);
-const floor = new THREE.Mesh(floorGeometry, materialSand);
-scene.add(floor);
-
 const textureRoad = textureLoader.load('assets/road.jpg', function (texture) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(2, roadLength);
 });
-const materialRoad = new THREE.MeshBasicMaterial({map: textureRoad});
+const materialRoad = new THREE.MeshLambertMaterial({map: textureRoad});
 const roadGeometry = new THREE.BoxGeometry(2, 0.1, roadLength);
 const road = new THREE.Mesh(roadGeometry, materialRoad);
 road.position.x = 5;
-road.position.y = 0.5;
+road.position.y = 0;
 road.position.z = 10;
+road.receiveShadow = true;
 scene.add(road);
 
+const textureCactus = textureLoader.load('assets/cactusNew.jpg');
+const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
 function createCactus(x, z) {
     const cactusStem = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 7);
     const cactusStemMesh = new THREE.Mesh(cactusStem, materialCactus)
@@ -121,23 +162,26 @@ function spreadCactus() {
 }
 
 gltfLoader.load("assets/models/rv.glb", function (gltf) {
-    gltf.scene.position.y = 0.5;
+    gltf.scene.position.y = 0;
     scene.add(gltf.scene);
 });
 
 gltfLoader.load("assets/models/walter.glb", function (gltf) {
     gltf.scene.scale.set(2, 2, 2);
     gltf.scene.rotation.x = 3.1
-    gltf.scene.position.y = 0.65;
+    gltf.scene.position.y = 0.15;
     gltf.scene.position.z = 5;
     scene.add(gltf.scene);
 });
 
 gltfLoader.load("assets/models/billboard.glb", function (gltf) {
-    gltf.scene.position.x = 10;
-    gltf.scene.position.y = 0;
-    gltf.scene.position.z = -100;
-    scene.add(gltf.scene);
+    const billboard = gltf.scene.children[0];
+    const scale = 0.5;
+    billboard.scale.set(scale, scale, scale);
+    billboard.position.x = 10;
+    billboard.position.y = 0;
+    billboard.position.z = -10;
+    scene.add(billboard);
 });
 
 var flamingo = null;
@@ -150,6 +194,8 @@ gltfLoader.load('assets/models/Flamingo.glb', function (gltf) {
     flamingo.position.y = 6;
     flamingo.position.z = 0;
     flamingo.rotation.y = 1.5;
+    flamingo.receiveShadow = true;
+    flamingo.castShadow = true;
     scene.add(flamingo);
 
     const mixer = new THREE.AnimationMixer(flamingo);
@@ -187,14 +233,15 @@ function animateFlyingFlamingo() {
     }
 }
 
-function createTumbleweed(x, z) {
-    const geometry = new THREE.SphereGeometry(hayBaleScale, 12, 12);
-    const colorMap = textureLoader.load("assets/tumbleweed.png");
-    const material = new THREE.MeshBasicMaterial({map: colorMap});
+const tumbleWeedGeometry = new THREE.SphereGeometry(hayBaleScale, 12, 12);
+const tumbleWeedMaterial = new THREE.MeshBasicMaterial({
+    map: textureLoader.load("assets/tumbleweed.png")
+});
 
-    const tumbleweed = new THREE.Mesh(geometry, material);
+function createTumbleweed(x, z) {
+    const tumbleweed = new THREE.Mesh(tumbleWeedGeometry, tumbleWeedMaterial);
     tumbleweed.position.x = x;
-    tumbleweed.position.y = 0.7;
+    tumbleweed.position.y = 0.15;
     tumbleweed.position.z = z;
     scene.add(tumbleweed);
 }
