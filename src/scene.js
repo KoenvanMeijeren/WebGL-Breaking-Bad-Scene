@@ -45,7 +45,7 @@ dirLight.shadow.camera.far = 3500;
 dirLight.shadow.bias = -0.0001;
 scene.add(new THREE.DirectionalLightHelper(dirLight, 10));
 
-camera.position.x = 50;  // Move right from center of scene
+camera.position.x = 10;  // Move right from center of scene
 camera.position.y = 20;  // Move up from center of scene
 camera.position.z = 50;  // Move camera away from center of scene
 
@@ -134,29 +134,53 @@ scene.add(road);
 
 const textureCactus = textureLoader.load('assets/cactusNew.jpg');
 const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
-function createCactus(x, z) {
+function createCactus(x, z, rotation) {
     const cactusStem = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 7);
     const cactusStemMesh = new THREE.Mesh(cactusStem, materialCactus)
-    cactusStemMesh.position.x = x;
+    cactusStemMesh.position.x = 0;
     cactusStemMesh.position.y = 1.2;
-    cactusStemMesh.position.z = z;
+    cactusStemMesh.position.z = 0;
 
-    const cactusTop = new THREE.IcosahedronGeometry(0.2, 1)
+    const cactusTop = new THREE.SphereGeometry(0.205, 7,7)
     const cactusTopMesh = new THREE.Mesh(cactusTop, materialCactus)
-    cactusTopMesh.position.x = x;
-    cactusTopMesh.position.y = 1.95;
-    cactusTopMesh.position.z = z;
+    cactusTopMesh.position.x = 0;
+    cactusTopMesh.position.y = 2;
+    cactusTopMesh.position.z = 0;
+    cactusTopMesh.rotation.y = 0.67;
 
-    scene.add(cactusStemMesh);
-    scene.add(cactusTopMesh);
+    const cactusBranch = new THREE.CylinderGeometry(0.13, 0.13, 1, 7);
+    const cactusBranchMesh = new THREE.Mesh(cactusBranch, materialCactus)
+    cactusBranchMesh.position.x = 0;
+    cactusBranchMesh.position.y = 1.3;
+    cactusBranchMesh.position.z = 0.25;
+    cactusBranchMesh.rotation.x = 0.5;
+
+    const cactusBranchTop = new THREE.ConeGeometry(0.13, 0.1, 7)
+    const cactusBranchTopMesh = new THREE.Mesh(cactusBranchTop, materialCactus)
+    cactusBranchTopMesh.position.x = 0;
+    cactusBranchTopMesh.position.y = 1.781;
+    cactusBranchTopMesh.position.z = 0.515;
+    cactusBranchTopMesh.rotation.x = 0.5;
+
+    cactusObject = new THREE.Object3D();
+    cactusObject.add(cactusStemMesh);
+    cactusObject.add(cactusTopMesh);
+    cactusObject.add(cactusBranchMesh);
+    cactusObject.add(cactusBranchTopMesh);
+
+    cactusObject.position.x = x;
+    cactusObject.position.z = z;
+    cactusObject.rotation.y = rotation;
+    scene.add(cactusObject);
 }
 
 function spreadCactus() {
     for (let xPositionIndex = -cactusSpreadRadius; xPositionIndex < cactusSpreadRadius; xPositionIndex = xPositionIndex + 25) {
-        for (let yPositionIndex = -cactusSpreadRadius; yPositionIndex < cactusSpreadRadius; yPositionIndex = yPositionIndex + 25) {
-            let randomNum = Math.random() * 20 - 10;
-            let randomNum2 = Math.random() * 20 - 10;
-            createCactus(xPositionIndex + randomNum, yPositionIndex + randomNum2);
+        for (let zPositionIndex = -cactusSpreadRadius; zPositionIndex < cactusSpreadRadius; zPositionIndex = zPositionIndex + 25) {
+            let randomX = Math.random() * 20 - 10;
+            let randomZ = Math.random() * 20 - 10;
+            let randomRotation = Math.random() * 6;
+            createCactus(xPositionIndex + randomX, zPositionIndex + randomZ , randomRotation);
         }
     }
 }
@@ -280,6 +304,11 @@ const render = function () {
 
     renderer.render(scene, camera);
 }
+
+// TEMPORARY
+camera.position.x = -6;  // Move right from center of scene
+camera.position.y = 2;  // Move up from center of scene
+camera.position.z = 6;  // Move camera away from center of scene
 
 render();
 spreadCactus();
