@@ -43,7 +43,7 @@ orbitControls.maxDistance = 20;
 const textureSand = textureLoader.load('assets/sand.jpg');
 textureSand.wrapS = textureSand.wrapT = THREE.RepeatWrapping;
 textureSand.repeat.set(floorRepeats, floorRepeats);
-const textureCactus = textureLoader.load('assets/cactus.jpg');
+const textureCactus = textureLoader.load('assets/cactusNew.jpg');
 const materialSand = new THREE.MeshBasicMaterial({map: textureSand});
 const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
 
