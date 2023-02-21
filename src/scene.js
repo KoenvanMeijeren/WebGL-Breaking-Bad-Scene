@@ -9,11 +9,11 @@ const camera = new THREE.PerspectiveCamera(
 
 // Settings
 const skyBoxScale = 2500,
-    roadLength = 500,
-    floorScale = 500,
-    floorRepeats = 100,
-    cactusSpreadRadius = 250,
-    tumbleWeedSpreadRadius = 100,
+    roadLength = 1000,
+    floorScale = 1000,
+    floorRepeats = 200,
+    cactusSpreadRadius = 500,
+    tumbleWeedSpreadRadius = 500,
     flamingoStartPosition = -20,
     flamingoEndPosition = 20,
     hayBaleScale = 0.2;
@@ -36,6 +36,8 @@ const animationMixers = [];
 
 const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
 orbitControls.noKeys = true;
+orbitControls.maxPolarAngle = Math.PI / 2 - 0.15;
+orbitControls.minDistance = 4;
 orbitControls.maxDistance = 20;
 
 const textureSand = textureLoader.load('assets/sand.jpg');
@@ -131,6 +133,13 @@ gltfLoader.load("assets/models/walter.glb", function (gltf) {
     scene.add(gltf.scene);
 });
 
+gltfLoader.load("assets/models/billboard.glb", function (gltf) {
+    gltf.scene.position.x = 10;
+    gltf.scene.position.y = 0;
+    gltf.scene.position.z = -100;
+    scene.add(gltf.scene);
+});
+
 var flamingo = null;
 gltfLoader.load('assets/models/Flamingo.glb', function (gltf) {
     flamingo = gltf.scene.children[0];
@@ -191,51 +200,14 @@ function createTumbleweed(x, z) {
 }
 
 function spreadTumbleweeds() {
-    for (let xPositionIndex = -tumbleWeedSpreadRadius; xPositionIndex < tumbleWeedSpreadRadius; xPositionIndex = xPositionIndex + 10) {
-        for (let yPositionIndex = -tumbleWeedSpreadRadius; yPositionIndex < tumbleWeedSpreadRadius; yPositionIndex = yPositionIndex + 10) {
+    for (let xPositionIndex = -tumbleWeedSpreadRadius; xPositionIndex < tumbleWeedSpreadRadius; xPositionIndex = xPositionIndex + 25) {
+        for (let yPositionIndex = -tumbleWeedSpreadRadius; yPositionIndex < tumbleWeedSpreadRadius; yPositionIndex = yPositionIndex + 25) {
             let randomNum = Math.random() * 20 - 10;
             let randomNum2 = Math.random() * 20 - 10;
             createTumbleweed(xPositionIndex + randomNum, yPositionIndex + randomNum2);
         }
     }
 }
-
-function createBuilding() {
-    let houseGroup = new THREE.Group(); //Creating group
-    houseGroup.position.set(-10, 3, -8); // set position of group (x-axis, y-axis, z-axis).
-
-    // To add bricks for home
-    let geometry = new THREE.BoxGeometry(10, 5, 3); // To draw cube shape geometry.
-    let mesh = new THREE.MeshBasicMaterial({color: 0x6e638a}); // Add color of cube for appearance of cube.
-    let cube = new THREE.Mesh(geometry, mesh); //With mesh adding appearance of cube over it.
-    let edgeLine = new THREE.BoxBufferGeometry(10, 5, 3);
-    let edges = new THREE.EdgesGeometry(edgeLine); // To have border of cube.
-    let line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({color: 0xffffff})); // Adding border around bricks
-    cube.position.set(0, 0, 4);
-    line.position.copy(cube.position); //Copy of cube position since border need to be added around cube.
-    // Adding line and brick to house group
-    houseGroup.add(line);
-    houseGroup.add(cube);
-    scene.add(houseGroup); //Adding housegroup to scene
-
-    // Note: Need to be added above renderer.render(scene, camera);
-    //To add roof for home
-    let roof = new THREE.ConeGeometry(6, 5, 1);
-    let roofMaterial = new THREE.MeshBasicMaterial({color: 0xd1d665});
-    let roofMesh = new THREE.Mesh(roof, roofMaterial);
-    roofMesh.position.set(-1.3, 5, 1);
-    houseGroup.add(roofMesh);
-
-    // Need to be added after code for roof of house.
-    //To add door for home
-    let door = new THREE.PlaneBufferGeometry(2, 3, 2);
-    let doorMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
-    let doorMesh = new THREE.Mesh(door, doorMaterial);
-    doorMesh.position.set(1, -0.75, 7);
-    houseGroup.add(doorMesh);
-}
-
-createBuilding();
 
 const render = function () {
     requestAnimationFrame(render);
