@@ -10,6 +10,8 @@ function init() {
     const music = document.getElementById("background-music");
 
     startBtn.addEventListener("click", () => {
+        startBtn.style.display = "none";
+        music.setAttribute('autoplay', 'autoplay');
         music.volume = 0.2;
         music.repeat = true;
         music.play();
