@@ -233,6 +233,17 @@ function spreadTumbleweeds() {
     }
 }
 
+window.addEventListener('resize', handleWindowResize, false);
+function handleWindowResize() {
+    const height = window.innerHeight;
+    const width = window.innerWidth;
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+
+    render();
+}
+
 const render = function () {
     requestAnimationFrame(render);
     orbitControls.update();
