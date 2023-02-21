@@ -38,7 +38,7 @@ const skyBoxScale = 2500,
 
 // Light
 const light = new THREE.DirectionalLight(0xdddddd, 5);
-light.position.set(-1, 1.75, 1);
+light.position.set(-1, 10, 1);
 light.position.multiplyScalar(30);
 light.castShadow = true;
 light.shadow.mapSize.width = shadowMapSize;
@@ -282,6 +282,45 @@ function spreadTumbleweeds() {
             createTumbleweed(xPositionIndex + randomNum, yPositionIndex + randomNum2);
         }
     }
+}
+
+let barrelGeometry = makeBarrel(1, 1.25, 3);
+let barrelMaterial = new THREE.MeshBasicMaterial({
+    map: new THREE.TextureLoader().load("assets/GoldenMothChemical.webp")
+});
+createBarrels(-3, -4);
+createBarrels(-4, -4);
+createBarrels(-3, -3);
+function createBarrels(x, z) {
+    for (let index = 0; index < 3; index++) {
+        let barrel = new THREE.Mesh(barrelGeometry, barrelMaterial);
+        barrel.scale.set(0.5, 0.5, 0.5);
+        barrel.position.x = x;
+        barrel.position.y = 0.7;
+        barrel.position.z = z;
+        barrel.castShadow = true;
+        scene.add(barrel);
+    }
+}
+
+function makeBarrel(radius, R, height){
+    let cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2, 24, 32);
+    let v3 = new THREE.Vector3();
+    let v2 = new THREE.Vector2();
+    let pos = cylinderGeometry.attributes.position;
+    let radiusDiff = R - radius;
+    for (let index = 0; index < pos.count; index++){
+        v3.fromBufferAttribute(pos, index);
+        let y = Math.abs(v3.y);
+        let rShift = Math.pow(Math.sqrt(1 - (y * y)), 2) * radiusDiff + radius;
+        v2.set(v3.x, v3.z).setLength(rShift);
+        v3.set(v2.x, v3.y, v2.y);
+        pos.setXYZ(index, v3.x, v3.y, v3.z);
+    }
+
+    cylinderGeometry.scale(1, height * 0.5, 1);
+
+    return cylinderGeometry;
 }
 
 window.addEventListener('resize', handleWindowResize, false);
