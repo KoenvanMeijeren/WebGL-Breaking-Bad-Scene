@@ -7,8 +7,6 @@ const camera = new THREE.PerspectiveCamera(
     5000 // far - Camera frustum far plane
 );
 
-window.addEventListener('resize', handleWindowResize, false);
-
 // Settings
 const skyBoxScale = 2500,
     roadLength = 1000,
@@ -211,6 +209,7 @@ function spreadTumbleweeds() {
     }
 }
 
+window.addEventListener('resize', handleWindowResize, false);
 function handleWindowResize() {
     const height = window.innerHeight;
     const width = window.innerWidth;
