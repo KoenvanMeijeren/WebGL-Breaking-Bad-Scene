@@ -38,7 +38,7 @@ const skyBoxScale = 2500,
 
 // Light
 const light = new THREE.DirectionalLight(0xdddddd, 5);
-light.position.set(-1, 10, 1);
+light.position.set(-1, 1.75, 1);
 light.position.multiplyScalar(30);
 light.castShadow = true;
 light.shadow.mapSize.width = shadowMapSize;
@@ -48,7 +48,6 @@ light.shadow.camera.right = shadowDistance;
 light.shadow.camera.top = shadowDistance;
 light.shadow.camera.bottom = -shadowDistance;
 light.shadow.camera.far = 3500;
-light.shadow.bias = -0.0001;
 scene.add(light);
 
 const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
