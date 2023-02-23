@@ -34,7 +34,8 @@ const skyBoxScale = 2500,
     flamingoEndPosition = 20,
     hayBaleScale = 0.2,
     zoomMinDistance = 4,
-    zoomMaxDistance = 20;
+    zoomMaxDistance = 20,
+    pyramidScale = 15;
 
 // Light
 const light = new THREE.DirectionalLight(0xdddddd, 5);
@@ -382,10 +383,10 @@ function buildPyramid() {
     const materialPyramid = new THREE.MeshBasicMaterial({
         map: texturePyramid
     });
-    let pyramidScale = 15;
+    let scale = pyramidScale;
     let pyramidY = 0;
     for (let index = 0; index < pyramidScale; index++) {
-        const geometryPyramid = new THREE.BoxGeometry(pyramidScale, 1, pyramidScale);
+        const geometryPyramid = new THREE.BoxGeometry(scale, 1, scale);
         const pyramid = new THREE.Mesh(geometryPyramid, materialPyramid);
         pyramid.position.x = 20;
         pyramid.position.y = pyramidY;
@@ -394,7 +395,7 @@ function buildPyramid() {
         pyramid.receiveShadow = true;
         scene.add(pyramid);
 
-        pyramidScale -= 1;
+        scale -= 1;
         pyramidY += 1;
     }
 }
