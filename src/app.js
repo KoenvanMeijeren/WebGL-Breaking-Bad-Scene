@@ -1,4 +1,4 @@
-window.addEventListener("DOMContentLoaded", (event) => {
+window.addEventListener("DOMContentLoaded", () => {
     init();
 
     // Work-around for cannot play music without user interaction.

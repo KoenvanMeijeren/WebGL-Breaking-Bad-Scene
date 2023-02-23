@@ -1,4 +1,4 @@
-// General settings
+// Construction of scene
 const scene = new THREE.Scene();
 const clock = new THREE.Clock();
 const camera = new THREE.PerspectiveCamera(
@@ -21,7 +21,7 @@ const textureLoader = new THREE.TextureLoader();
 const gltfLoader = new THREE.GLTFLoader();
 const animationMixers = [];
 
-// Settings
+// General settings
 const skyBoxScale = 2500,
     roadLength = 1000,
     shadowMapSize = 2048,
@@ -34,7 +34,8 @@ const skyBoxScale = 2500,
     flamingoEndPosition = 20,
     hayBaleScale = 0.2,
     zoomMinDistance = 4,
-    zoomMaxDistance = 20;
+    zoomMaxDistance = 20,
+    pyramidScale = 15;
 
 // Light
 const light = new THREE.DirectionalLight(0xdddddd, 5);
@@ -48,16 +49,16 @@ light.shadow.camera.right = shadowDistance;
 light.shadow.camera.top = shadowDistance;
 light.shadow.camera.bottom = -shadowDistance;
 light.shadow.camera.far = 3500;
-light.shadow.bias = -0.0001;
 scene.add(light);
 
+// Implement control of scene by mouse
 const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
 orbitControls.noKeys = true;
 orbitControls.maxPolarAngle = Math.PI / 2 - 0.15;
 orbitControls.minDistance = zoomMinDistance;
 orbitControls.maxDistance = zoomMaxDistance;
 
-// GROUND
+// Add the ground
 const textureSand = textureLoader.load('assets/sand.jpg');
 textureSand.wrapS = textureSand.wrapT = THREE.RepeatWrapping;
 textureSand.repeat.set(floorRepeats, floorRepeats);
@@ -67,6 +68,7 @@ const floorGeometry = new THREE.BoxGeometry(floorScale, 0, floorScale);
 const floor = new THREE.Mesh(floorGeometry, materialSand);
 scene.add(floor);
 
+// Enable shadow
 const groundShadowGeometry = new THREE.PlaneGeometry(floorScale, floorScale);
 const groundShadowMaterial = new THREE.ShadowMaterial();
 const groundShadow = new THREE.Mesh(groundShadowGeometry, groundShadowMaterial);
@@ -75,7 +77,7 @@ groundShadow.rotation.x = -Math.PI / 2;
 groundShadow.receiveShadow = true;
 scene.add(groundShadow);
 
-// Skybox
+// Add skybox
 let skyBoxMaterials = [];
 skyBoxMaterials.push(new THREE.MeshBasicMaterial({
     map: textureLoader.load('assets/sky/sky_ft.jpg'),
@@ -106,7 +108,7 @@ let skyboxGeometry = new THREE.BoxGeometry(skyBoxScale, skyBoxScale, skyBoxScale
 let skybox = new THREE.Mesh(skyboxGeometry, skyBoxMaterials);
 scene.add(skybox);
 
-// Road
+// Add road
 const textureRoad = textureLoader.load('assets/road.jpg', function (texture) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(2, roadLength);
@@ -120,14 +122,15 @@ road.position.z = 10;
 road.receiveShadow = true;
 scene.add(road);
 
-// Cactus creation
+// Spread the cacti around the world
 const textureCactus = textureLoader.load('assets/cactusNew.jpg');
 const cactusStem = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 7);
 const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
-const cactusTop = new THREE.SphereGeometry(0.205, 7,7);
+const cactusTop = new THREE.SphereGeometry(0.205, 7, 7);
 const cactusBranch = new THREE.CylinderGeometry(0.13, 0.13, 1, 7);
 const cactusBranchTop = new THREE.ConeGeometry(0.13, 0.1, 7);
 spreadCactus();
+
 function createCactus(x, z, rotation) {
     const cactusStemMesh = new THREE.Mesh(cactusStem, materialCactus);
     cactusStemMesh.position.x = 0;
@@ -175,7 +178,7 @@ function spreadCactus() {
             let randomX = Math.random() * 20 - 10;
             let randomZ = Math.random() * 20 - 10;
             let randomRotation = Math.random() * 6;
-            createCactus(xPositionIndex + randomX, zPositionIndex + randomZ , randomRotation);
+            createCactus(xPositionIndex + randomX, zPositionIndex + randomZ, randomRotation);
         }
     }
 }
@@ -184,7 +187,7 @@ function spreadCactus() {
 gltfLoader.load("assets/models/rv.glb", function (gltf) {
     gltf.scene.position.y = 0;
     gltf.scene.position.z = -2;
-    gltf.scene.receiveShadow = true;
+    addShadowToImportedModel(gltf);
     scene.add(gltf.scene);
 });
 
@@ -194,6 +197,7 @@ gltfLoader.load("assets/models/walter.glb", function (gltf) {
     gltf.scene.rotation.x = 3.1
     gltf.scene.position.y = 0.15;
     gltf.scene.position.z = 5;
+    addShadowToImportedModel(gltf);
     scene.add(gltf.scene);
 });
 
@@ -205,6 +209,7 @@ gltfLoader.load("assets/models/billboard.glb", function (gltf) {
     billboard.position.x = 10;
     billboard.position.y = 0;
     billboard.position.z = -50;
+    addShadowToImportedModel(gltf);
     scene.add(billboard);
 });
 
@@ -229,6 +234,7 @@ gltfLoader.load('assets/models/Flamingo.glb', function (gltf) {
 });
 
 let hasFlamingoReachedEnd = false, hasFlamingoReachedStart = false;
+
 function animateFlyingFlamingo() {
     if (flamingo == null) {
         return;
@@ -258,12 +264,13 @@ function animateFlyingFlamingo() {
     }
 }
 
-// Tumble weeds
+// Spread the tumbleweeds around the world
 const tumbleWeedGeometry = new THREE.SphereGeometry(hayBaleScale, 12, 12);
 const tumbleWeedMaterial = new THREE.MeshBasicMaterial({
     map: textureLoader.load("assets/tumbleweed.png")
 });
 spreadTumbleweeds();
+
 function createTumbleweed(x, z) {
     const tumbleweed = new THREE.Mesh(tumbleWeedGeometry, tumbleWeedMaterial);
     tumbleweed.position.x = x;
@@ -284,7 +291,118 @@ function spreadTumbleweeds() {
     }
 }
 
+// Add drug barrels
+let barrelGeometry = makeBarrel(1, 1.25, 3);
+let barrelMaterial = new THREE.MeshBasicMaterial({
+    map: textureLoader.load("assets/GoldenMothChemical.webp")
+});
+createBarrels(-3, -4);
+createBarrels(-4, -4);
+createBarrels(-4, -2.5, 1.5);
+
+function createBarrels(x, z, rotation = 0) {
+    for (let index = 0; index < 3; index++) {
+        let barrel = new THREE.Mesh(barrelGeometry, barrelMaterial);
+        barrel.scale.set(0.5, 0.5, 0.5);
+        barrel.position.x = x;
+        barrel.position.y = 0.7;
+        barrel.position.z = z;
+        barrel.castShadow = true;
+        if (rotation !== 0) {
+            barrel.rotation.z = rotation;
+        }
+
+        scene.add(barrel);
+    }
+}
+
+function makeBarrel(radius, width, height) {
+    let cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2, 24, 32);
+    let vector3 = new THREE.Vector3();
+    let vector2 = new THREE.Vector2();
+    let position = cylinderGeometry.attributes.position;
+    let radiusDiff = width - radius;
+    for (let index = 0; index < position.count; index++) {
+        vector3.fromBufferAttribute(position, index);
+        let y = Math.abs(vector3.y);
+        let rShift = Math.pow(Math.sqrt(1 - (y * y)), 2) * radiusDiff + radius;
+        vector2.set(vector3.x, vector3.z).setLength(rShift);
+        vector3.set(vector2.x, vector3.y, vector2.y);
+        position.setXYZ(index, vector3.x, vector3.y, vector3.z);
+    }
+
+    cylinderGeometry.scale(1, height * 0.5, 1);
+
+    return cylinderGeometry;
+}
+
+// Add drug barrels floor
+addBarrelFloors();
+
+function addBarrelFloors() {
+    const barrelFloorGeometry = new THREE.BoxGeometry(3, 0.1, 3);
+    const barrelFloorMaterialPhong = new THREE.MeshPhongMaterial({
+        color: 0x3f453d,
+    });
+    const barrelPhongFloor = new THREE.Mesh(barrelFloorGeometry, barrelFloorMaterialPhong);
+    barrelPhongFloor.position.x = -3.5;
+    barrelPhongFloor.position.z = -3.2;
+    scene.add(barrelPhongFloor);
+
+    const barrelFloorMetalMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x3f453d,
+        roughness: 0.5,
+        metalness: 0.5
+    });
+    const barrelMetalFloor = new THREE.Mesh(barrelFloorGeometry, barrelFloorMetalMaterial);
+    barrelMetalFloor.position.x = -3.5;
+    barrelMetalFloor.position.z = -0.2;
+    scene.add(barrelMetalFloor);
+
+    const lanternMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffaa00,
+        transparent: true,
+        blending: THREE.AdditiveBlending
+    });
+    const lanternGeometry = new THREE.SphereGeometry(1, 32, 32);
+    const lantern = new THREE.Mesh(lanternGeometry, lanternMaterial);
+    lantern.position.x = -3.5;
+    lantern.position.y = 1;
+    lantern.position.z = 0;
+    scene.add(lantern);
+}
+
+// Add pyramid
+buildPyramid();
+
+function buildPyramid() {
+    const texturePyramid = textureLoader.load('assets/pyramid-stone.webp');
+    texturePyramid.wrapS = THREE.RepeatWrapping;
+    texturePyramid.wrapT = THREE.RepeatWrapping;
+    texturePyramid.repeat.set(4, 4);
+    const materialPyramid = new THREE.MeshBasicMaterial({
+        map: texturePyramid
+    });
+    let scale = pyramidScale;
+    let pyramidY = 0;
+    for (let index = 0; index < pyramidScale; index++) {
+        const geometryPyramid = new THREE.BoxGeometry(scale, 1, scale);
+        const pyramid = new THREE.Mesh(geometryPyramid, materialPyramid);
+        pyramid.position.x = 20;
+        pyramid.position.y = pyramidY;
+        pyramid.position.z = -8;
+        pyramid.castShadow = true;
+        pyramid.receiveShadow = true;
+        scene.add(pyramid);
+
+        scale -= 1;
+        pyramidY += 1;
+    }
+}
+
+// Act on window resizes
 window.addEventListener('resize', handleWindowResize, false);
+
 function handleWindowResize() {
     const height = window.innerHeight;
     const width = window.innerWidth;
@@ -295,7 +413,10 @@ function handleWindowResize() {
     render();
 }
 
-const render = function () {
+// Render the world
+render();
+
+function render() {
     requestAnimationFrame(render);
     orbitControls.update();
 
@@ -309,4 +430,18 @@ const render = function () {
     renderer.render(scene, camera);
 }
 
-render();
+/**
+ * Helper method for adding shadow to imported models.
+ *
+ * @param {object} gltf
+ *   The gltf object.
+ */
+function addShadowToImportedModel(gltf) {
+    gltf.scene.traverse(function (node) {
+        if (!node.isMesh) {
+            return;
+        }
+
+        node.castShadow = true;
+    });
+}
