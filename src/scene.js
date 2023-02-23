@@ -185,7 +185,7 @@ function spreadCactus() {
 gltfLoader.load("assets/models/rv.glb", function (gltf) {
     gltf.scene.position.y = 0;
     gltf.scene.position.z = -2;
-    gltf.scene.receiveShadow = true;
+    addShadowToImportedModel(gltf);
     scene.add(gltf.scene);
 });
 
@@ -195,6 +195,7 @@ gltfLoader.load("assets/models/walter.glb", function (gltf) {
     gltf.scene.rotation.x = 3.1
     gltf.scene.position.y = 0.15;
     gltf.scene.position.z = 5;
+    addShadowToImportedModel(gltf);
     scene.add(gltf.scene);
 });
 
@@ -206,6 +207,7 @@ gltfLoader.load("assets/models/billboard.glb", function (gltf) {
     billboard.position.x = 10;
     billboard.position.y = 0;
     billboard.position.z = -50;
+    addShadowToImportedModel(gltf);
     scene.add(billboard);
 });
 
@@ -366,4 +368,20 @@ function render() {
     }
 
     renderer.render(scene, camera);
+}
+
+/**
+ * Helper method for adding shadow to imported models.
+ *
+ * @param {object} gltf
+ *   The gltf object.
+ */
+function addShadowToImportedModel(gltf) {
+    gltf.scene.traverse(function(node) {
+        if (!node.isMesh) {
+            return;
+        }
+
+        node.castShadow = true;
+    });
 }
