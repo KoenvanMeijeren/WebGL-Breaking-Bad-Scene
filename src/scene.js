@@ -1,4 +1,4 @@
-// General settings
+// Construction of scene
 const scene = new THREE.Scene();
 const clock = new THREE.Clock();
 const camera = new THREE.PerspectiveCamera(
@@ -21,7 +21,7 @@ const textureLoader = new THREE.TextureLoader();
 const gltfLoader = new THREE.GLTFLoader();
 const animationMixers = [];
 
-// Settings
+// General settings
 const skyBoxScale = 2500,
     roadLength = 1000,
     shadowMapSize = 2048,
@@ -50,13 +50,14 @@ light.shadow.camera.bottom = -shadowDistance;
 light.shadow.camera.far = 3500;
 scene.add(light);
 
+// Implement control of scene by mouse
 const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
 orbitControls.noKeys = true;
 orbitControls.maxPolarAngle = Math.PI / 2 - 0.15;
 orbitControls.minDistance = zoomMinDistance;
 orbitControls.maxDistance = zoomMaxDistance;
 
-// GROUND
+// Add the ground
 const textureSand = textureLoader.load('assets/sand.jpg');
 textureSand.wrapS = textureSand.wrapT = THREE.RepeatWrapping;
 textureSand.repeat.set(floorRepeats, floorRepeats);
@@ -66,6 +67,7 @@ const floorGeometry = new THREE.BoxGeometry(floorScale, 0, floorScale);
 const floor = new THREE.Mesh(floorGeometry, materialSand);
 scene.add(floor);
 
+// Enable shadow
 const groundShadowGeometry = new THREE.PlaneGeometry(floorScale, floorScale);
 const groundShadowMaterial = new THREE.ShadowMaterial();
 const groundShadow = new THREE.Mesh(groundShadowGeometry, groundShadowMaterial);
@@ -74,7 +76,7 @@ groundShadow.rotation.x = -Math.PI / 2;
 groundShadow.receiveShadow = true;
 scene.add(groundShadow);
 
-// Skybox
+// Add skybox
 let skyBoxMaterials = [];
 skyBoxMaterials.push(new THREE.MeshBasicMaterial({
     map: textureLoader.load('assets/sky/sky_ft.jpg'),
@@ -105,7 +107,7 @@ let skyboxGeometry = new THREE.BoxGeometry(skyBoxScale, skyBoxScale, skyBoxScale
 let skybox = new THREE.Mesh(skyboxGeometry, skyBoxMaterials);
 scene.add(skybox);
 
-// Road
+// Add road
 const textureRoad = textureLoader.load('assets/road.jpg', function (texture) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(2, roadLength);
@@ -119,7 +121,7 @@ road.position.z = 10;
 road.receiveShadow = true;
 scene.add(road);
 
-// Cactus creation
+// Spread the cacti around the world
 const textureCactus = textureLoader.load('assets/cactusNew.jpg');
 const cactusStem = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 7);
 const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
@@ -257,7 +259,7 @@ function animateFlyingFlamingo() {
     }
 }
 
-// Tumble weeds
+// Spread the tumbleweeds around the world
 const tumbleWeedGeometry = new THREE.SphereGeometry(hayBaleScale, 12, 12);
 const tumbleWeedMaterial = new THREE.MeshBasicMaterial({
     map: textureLoader.load("assets/tumbleweed.png")
@@ -283,14 +285,15 @@ function spreadTumbleweeds() {
     }
 }
 
+// Add drug barrels
 let barrelGeometry = makeBarrel(1, 1.25, 3);
 let barrelMaterial = new THREE.MeshBasicMaterial({
-    map: new THREE.TextureLoader().load("assets/GoldenMothChemical.webp")
+    map: textureLoader.load("assets/GoldenMothChemical.webp")
 });
 createBarrels(-3, -4);
 createBarrels(-4, -4);
-createBarrels(-3, -3);
-function createBarrels(x, z) {
+createBarrels(-4, -2.5, 1.5);
+function createBarrels(x, z, rotation = 0) {
     for (let index = 0; index < 3; index++) {
         let barrel = new THREE.Mesh(barrelGeometry, barrelMaterial);
         barrel.scale.set(0.5, 0.5, 0.5);
@@ -298,23 +301,27 @@ function createBarrels(x, z) {
         barrel.position.y = 0.7;
         barrel.position.z = z;
         barrel.castShadow = true;
+        if (rotation !== 0) {
+            barrel.rotation.z = rotation;
+        }
+
         scene.add(barrel);
     }
 }
 
-function makeBarrel(radius, R, height){
+function makeBarrel(radius, width, height){
     let cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2, 24, 32);
-    let v3 = new THREE.Vector3();
-    let v2 = new THREE.Vector2();
-    let pos = cylinderGeometry.attributes.position;
-    let radiusDiff = R - radius;
-    for (let index = 0; index < pos.count; index++){
-        v3.fromBufferAttribute(pos, index);
-        let y = Math.abs(v3.y);
+    let vector3 = new THREE.Vector3();
+    let vector2 = new THREE.Vector2();
+    let position = cylinderGeometry.attributes.position;
+    let radiusDiff = width - radius;
+    for (let index = 0; index < position.count; index++){
+        vector3.fromBufferAttribute(position, index);
+        let y = Math.abs(vector3.y);
         let rShift = Math.pow(Math.sqrt(1 - (y * y)), 2) * radiusDiff + radius;
-        v2.set(v3.x, v3.z).setLength(rShift);
-        v3.set(v2.x, v3.y, v2.y);
-        pos.setXYZ(index, v3.x, v3.y, v3.z);
+        vector2.set(vector3.x, vector3.z).setLength(rShift);
+        vector3.set(vector2.x, vector3.y, vector2.y);
+        position.setXYZ(index, vector3.x, vector3.y, vector3.z);
     }
 
     cylinderGeometry.scale(1, height * 0.5, 1);
@@ -322,6 +329,18 @@ function makeBarrel(radius, R, height){
     return cylinderGeometry;
 }
 
+// Add drug barrels floor
+const barrelFloorGeometry = new THREE.BoxGeometry(3, 0.1, 3);
+const barrelFloorMaterial = new THREE.MeshPhongMaterial({
+    color:0x3f453d,
+    shininess: 100
+});
+const barrelFloor = new THREE.Mesh(barrelFloorGeometry, barrelFloorMaterial);
+barrelFloor.position.x = -3.5;
+barrelFloor.position.z = -3.2;
+scene.add(barrelFloor);
+
+// Act on window resizes
 window.addEventListener('resize', handleWindowResize, false);
 function handleWindowResize() {
     const height = window.innerHeight;
@@ -333,7 +352,9 @@ function handleWindowResize() {
     render();
 }
 
-const render = function () {
+// Render the world
+render();
+function render() {
     requestAnimationFrame(render);
     orbitControls.update();
 
@@ -346,5 +367,3 @@ const render = function () {
 
     renderer.render(scene, camera);
 }
-
-render();
