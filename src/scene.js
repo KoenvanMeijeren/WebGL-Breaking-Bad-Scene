@@ -125,10 +125,11 @@ scene.add(road);
 const textureCactus = textureLoader.load('assets/cactusNew.jpg');
 const cactusStem = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 7);
 const materialCactus = new THREE.MeshBasicMaterial({map: textureCactus});
-const cactusTop = new THREE.SphereGeometry(0.205, 7,7);
+const cactusTop = new THREE.SphereGeometry(0.205, 7, 7);
 const cactusBranch = new THREE.CylinderGeometry(0.13, 0.13, 1, 7);
 const cactusBranchTop = new THREE.ConeGeometry(0.13, 0.1, 7);
 spreadCactus();
+
 function createCactus(x, z, rotation) {
     const cactusStemMesh = new THREE.Mesh(cactusStem, materialCactus);
     cactusStemMesh.position.x = 0;
@@ -176,7 +177,7 @@ function spreadCactus() {
             let randomX = Math.random() * 20 - 10;
             let randomZ = Math.random() * 20 - 10;
             let randomRotation = Math.random() * 6;
-            createCactus(xPositionIndex + randomX, zPositionIndex + randomZ , randomRotation);
+            createCactus(xPositionIndex + randomX, zPositionIndex + randomZ, randomRotation);
         }
     }
 }
@@ -232,6 +233,7 @@ gltfLoader.load('assets/models/Flamingo.glb', function (gltf) {
 });
 
 let hasFlamingoReachedEnd = false, hasFlamingoReachedStart = false;
+
 function animateFlyingFlamingo() {
     if (flamingo == null) {
         return;
@@ -267,6 +269,7 @@ const tumbleWeedMaterial = new THREE.MeshBasicMaterial({
     map: textureLoader.load("assets/tumbleweed.png")
 });
 spreadTumbleweeds();
+
 function createTumbleweed(x, z) {
     const tumbleweed = new THREE.Mesh(tumbleWeedGeometry, tumbleWeedMaterial);
     tumbleweed.position.x = x;
@@ -295,6 +298,7 @@ let barrelMaterial = new THREE.MeshBasicMaterial({
 createBarrels(-3, -4);
 createBarrels(-4, -4);
 createBarrels(-4, -2.5, 1.5);
+
 function createBarrels(x, z, rotation = 0) {
     for (let index = 0; index < 3; index++) {
         let barrel = new THREE.Mesh(barrelGeometry, barrelMaterial);
@@ -311,13 +315,13 @@ function createBarrels(x, z, rotation = 0) {
     }
 }
 
-function makeBarrel(radius, width, height){
+function makeBarrel(radius, width, height) {
     let cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2, 24, 32);
     let vector3 = new THREE.Vector3();
     let vector2 = new THREE.Vector2();
     let position = cylinderGeometry.attributes.position;
     let radiusDiff = width - radius;
-    for (let index = 0; index < position.count; index++){
+    for (let index = 0; index < position.count; index++) {
         vector3.fromBufferAttribute(position, index);
         let y = Math.abs(vector3.y);
         let rShift = Math.pow(Math.sqrt(1 - (y * y)), 2) * radiusDiff + radius;
@@ -332,18 +336,72 @@ function makeBarrel(radius, width, height){
 }
 
 // Add drug barrels floor
-const barrelFloorGeometry = new THREE.BoxGeometry(3, 0.1, 3);
-const barrelFloorMaterial = new THREE.MeshPhongMaterial({
-    color:0x3f453d,
-    shininess: 100
-});
-const barrelFloor = new THREE.Mesh(barrelFloorGeometry, barrelFloorMaterial);
-barrelFloor.position.x = -3.5;
-barrelFloor.position.z = -3.2;
-scene.add(barrelFloor);
+addBarrelFloors();
+
+function addBarrelFloors() {
+    const barrelFloorGeometry = new THREE.BoxGeometry(3, 0.1, 3);
+    const barrelFloorMaterialPhong = new THREE.MeshPhongMaterial({
+        color: 0x3f453d,
+    });
+    const barrelPhongFloor = new THREE.Mesh(barrelFloorGeometry, barrelFloorMaterialPhong);
+    barrelPhongFloor.position.x = -3.5;
+    barrelPhongFloor.position.z = -3.2;
+    scene.add(barrelPhongFloor);
+
+    const barrelFloorMetalMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x3f453d,
+        roughness: 0.5,
+        metalness: 0.5
+    });
+    const barrelMetalFloor = new THREE.Mesh(barrelFloorGeometry, barrelFloorMetalMaterial);
+    barrelMetalFloor.position.x = -3.5;
+    barrelMetalFloor.position.z = -0.2;
+    scene.add(barrelMetalFloor);
+
+    const lanternMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffaa00,
+        transparent: true,
+        blending: THREE.AdditiveBlending
+    });
+    const lanternGeometry = new THREE.SphereGeometry(1, 32, 32);
+    const lantern = new THREE.Mesh(lanternGeometry, lanternMaterial);
+    lantern.position.x = -3.5;
+    lantern.position.y = 1;
+    lantern.position.z = 0;
+    scene.add(lantern);
+}
+
+// Add pyramid
+buildPyramid();
+
+function buildPyramid() {
+    const texturePyramid = textureLoader.load('assets/pyramid-stone.webp');
+    texturePyramid.wrapS = THREE.RepeatWrapping;
+    texturePyramid.wrapT = THREE.RepeatWrapping;
+    texturePyramid.repeat.set(4, 4);
+    const materialPyramid = new THREE.MeshBasicMaterial({
+        map: texturePyramid
+    });
+    let pyramidScale = 15;
+    let pyramidY = 0;
+    for (let index = 0; index < pyramidScale; index++) {
+        const geometryPyramid = new THREE.BoxGeometry(pyramidScale, 1, pyramidScale);
+        const pyramid = new THREE.Mesh(geometryPyramid, materialPyramid);
+        pyramid.position.x = 20;
+        pyramid.position.y = pyramidY;
+        pyramid.position.z = -8;
+        pyramid.castShadow = true;
+        pyramid.receiveShadow = true;
+        scene.add(pyramid);
+
+        pyramidScale -= 1;
+        pyramidY += 1;
+    }
+}
 
 // Act on window resizes
 window.addEventListener('resize', handleWindowResize, false);
+
 function handleWindowResize() {
     const height = window.innerHeight;
     const width = window.innerWidth;
@@ -356,6 +414,7 @@ function handleWindowResize() {
 
 // Render the world
 render();
+
 function render() {
     requestAnimationFrame(render);
     orbitControls.update();
@@ -377,7 +436,7 @@ function render() {
  *   The gltf object.
  */
 function addShadowToImportedModel(gltf) {
-    gltf.scene.traverse(function(node) {
+    gltf.scene.traverse(function (node) {
         if (!node.isMesh) {
             return;
         }
