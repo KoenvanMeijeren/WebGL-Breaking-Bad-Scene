@@ -27,7 +27,7 @@ const skyBoxScale = 2500,
     shadowMapSize = 2048,
     shadowDistance = 50,
     floorScale = 1000,
-    floorRepeats = 1000,
+    floorRepeats = 100,
     cactusSpreadRadius = 500,
     tumbleWeedSpreadRadius = 500,
     vultureStartPosition = -20,
@@ -407,7 +407,7 @@ function buildPyramid() {
     const texturePyramid = textureLoader.load('assets/pyramid-stone.webp');
     texturePyramid.wrapS = THREE.RepeatWrapping;
     texturePyramid.wrapT = THREE.RepeatWrapping;
-    texturePyramid.repeat.set(4, 4);
+    texturePyramid.repeat.set(15, 1);
     const materialPyramid = new THREE.MeshBasicMaterial({
         map: texturePyramid
     });
