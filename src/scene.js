@@ -179,6 +179,11 @@ function spreadCactus() {
             let randomX = Math.random() * 20 - 10;
             let randomZ = Math.random() * 20 - 10;
             let randomRotation = Math.random() * 6;
+
+            if (xPositionIndex + randomX > -10 && xPositionIndex + randomX < 30) {
+                continue;
+            }
+
             createCactus(xPositionIndex + randomX, zPositionIndex + randomZ, randomRotation);
         }
     }
