@@ -296,9 +296,9 @@ let barrelGeometry = makeBarrel(1, 1.25, 3);
 let barrelMaterial = new THREE.MeshBasicMaterial({
     map: textureLoader.load("assets/GoldenMothChemical.webp")
 });
-createBarrels(-3, -4);
-createBarrels(-4, -4);
-createBarrels(-4, -2.5, 1.5);
+createBarrels(-3, -3);
+createBarrels(-4, 0);
+createBarrels(-4, -1.5, 1.5);
 
 function createBarrels(x, z, rotation = 0) {
     for (let index = 0; index < 3; index++) {
@@ -358,18 +358,23 @@ function addBarrelFloors() {
     barrelMetalFloor.position.x = -3.5;
     barrelMetalFloor.position.z = -0.2;
     scene.add(barrelMetalFloor);
+}
 
-    const lanternMaterial = new THREE.MeshBasicMaterial({
+// Add sun
+addSun();
+
+function addSun() {
+    const sunMaterial = new THREE.MeshBasicMaterial({
         color: 0xffaa00,
         transparent: true,
         blending: THREE.AdditiveBlending
     });
-    const lanternGeometry = new THREE.SphereGeometry(1, 32, 32);
-    const lantern = new THREE.Mesh(lanternGeometry, lanternMaterial);
-    lantern.position.x = -3.5;
-    lantern.position.y = 1;
-    lantern.position.z = 0;
-    scene.add(lantern);
+    const sunGeometry = new THREE.SphereGeometry(20, 32, 32);
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.position.x = -500;
+    sun.position.y = 150;
+    sun.position.z = 500;
+    scene.add(sun);
 }
 
 // Add pyramid
