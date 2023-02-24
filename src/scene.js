@@ -57,6 +57,7 @@ orbitControls.noKeys = true;
 orbitControls.maxPolarAngle = Math.PI / 2 - 0.15;
 orbitControls.minDistance = zoomMinDistance;
 orbitControls.maxDistance = zoomMaxDistance;
+orbitControls.enablePan = false;
 
 // Add the ground
 const textureSand = textureLoader.load('assets/sand.jpg');
@@ -213,6 +214,26 @@ gltfLoader.load("assets/models/billboard.glb", function (gltf) {
     scene.add(billboard);
 });
 
+// Vulture shadow creation
+var vultureShadow = null;
+gltfLoader.load('assets/models/Flamingo.glb', function (gltf) {
+    vultureShadow = gltf.scene.children[0];
+
+    const scale = 0.01;
+    vultureShadow.scale.set(scale, scale, scale);
+    vultureShadow.position.x = 3;
+    vultureShadow.position.y = 6;
+    vultureShadow.position.z = 5;
+    vultureShadow.rotation.y = 1.5;
+    vultureShadow.receiveShadow = true;
+    vultureShadow.castShadow = true;
+    scene.add(vultureShadow);
+
+    const mixer = new THREE.AnimationMixer(vultureShadow);
+    mixer.clipAction(gltf.animations[0]).setDuration(1).play();
+    animationMixers.push(mixer);
+});
+
 // Vulture creation
 var vulture = null;
 gltfLoader.load('assets/models/Vulture.glb', function (gltf) {
@@ -224,37 +245,39 @@ gltfLoader.load('assets/models/Vulture.glb', function (gltf) {
     vulture.position.y = 6;
     vulture.position.z = 5;
     vulture.rotation.y = 1.5;
-    vulture.receiveShadow = true;
-    vulture.castShadow = true;
     scene.add(vulture);
 
-    const mixer = new THREE.AnimationMixer(vulture);
-    mixer.clipAction(gltf.animations[0]).setDuration(1).play();
-    animationMixers.push(mixer);
+    const mixer2 = new THREE.AnimationMixer(vulture);
+    mixer2.clipAction(gltf.animations[0]).setDuration(1).play();
+    animationMixers.push(mixer2);
 });
 
 let hasVultureReachedEnd = false, hasVultureReachedStart = false;
 
 function animateFlyingVulture() {
-    if (vulture == null) {
+    if (vultureShadow == null) {
         return;
     }
 
-    if (!hasVultureReachedEnd && vulture.position.x < vultureEndPosition) {
+    if (!hasVultureReachedEnd && vultureShadow.position.x < vultureEndPosition) {
+        vultureShadow.position.x += 0.1;
         vulture.position.x += 0.1;
     }
 
-    if (vulture.position.x > vultureEndPosition) {
+    if (vultureShadow.position.x > vultureEndPosition) {
         hasVultureReachedEnd = true;
+        vultureShadow.rotation.y = -1.5;
         vulture.rotation.y = -1.5;
     }
 
-    if (hasVultureReachedEnd && vulture.position.x > vultureStartPosition) {
+    if (hasVultureReachedEnd && vultureShadow.position.x > vultureStartPosition) {
+        vultureShadow.position.x -= 0.1;
         vulture.position.x -= 0.1;
     }
 
-    if (vulture.position.x < vultureStartPosition) {
+    if (vultureShadow.position.x < vultureStartPosition) {
         hasVultureReachedStart = true;
+        vultureShadow.rotation.y = 1.5;
         vulture.rotation.y = 1.5;
     }
 
