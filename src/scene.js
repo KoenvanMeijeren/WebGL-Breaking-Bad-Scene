@@ -30,8 +30,8 @@ const skyBoxScale = 2500,
     floorRepeats = 1000,
     cactusSpreadRadius = 500,
     tumbleWeedSpreadRadius = 500,
-    flamingoStartPosition = -20,
-    flamingoEndPosition = 20,
+    vultureStartPosition = -20,
+    vultureEndPosition = 20,
     hayBaleScale = 0.2,
     zoomMinDistance = 4,
     zoomMaxDistance = 20,
@@ -213,54 +213,54 @@ gltfLoader.load("assets/models/billboard.glb", function (gltf) {
     scene.add(billboard);
 });
 
-// Flamingo creation
-var flamingo = null;
+// Vulture creation
+var vulture = null;
 gltfLoader.load('assets/models/Vulture.glb', function (gltf) {
-    flamingo = gltf.scene.children[0];
+    vulture = gltf.scene.children[0];
 
     const scale = 0.01;
-    flamingo.scale.set(scale, scale, scale);
-    flamingo.position.x = 3;
-    flamingo.position.y = 6;
-    flamingo.position.z = 5;
-    flamingo.rotation.y = 1.5;
-    flamingo.receiveShadow = true;
-    flamingo.castShadow = true;
-    scene.add(flamingo);
+    vulture.scale.set(scale, scale, scale);
+    vulture.position.x = 3;
+    vulture.position.y = 6;
+    vulture.position.z = 5;
+    vulture.rotation.y = 1.5;
+    vulture.receiveShadow = true;
+    vulture.castShadow = true;
+    scene.add(vulture);
 
-    const mixer = new THREE.AnimationMixer(flamingo);
+    const mixer = new THREE.AnimationMixer(vulture);
     mixer.clipAction(gltf.animations[0]).setDuration(1).play();
     animationMixers.push(mixer);
 });
 
-let hasFlamingoReachedEnd = false, hasFlamingoReachedStart = false;
+let hasVultureReachedEnd = false, hasVultureReachedStart = false;
 
-function animateFlyingFlamingo() {
-    if (flamingo == null) {
+function animateFlyingVulture() {
+    if (vulture == null) {
         return;
     }
 
-    if (!hasFlamingoReachedEnd && flamingo.position.x < flamingoEndPosition) {
-        flamingo.position.x += 0.1;
+    if (!hasVultureReachedEnd && vulture.position.x < vultureEndPosition) {
+        vulture.position.x += 0.1;
     }
 
-    if (flamingo.position.x > flamingoEndPosition) {
-        hasFlamingoReachedEnd = true;
-        flamingo.rotation.y = -1.5;
+    if (vulture.position.x > vultureEndPosition) {
+        hasVultureReachedEnd = true;
+        vulture.rotation.y = -1.5;
     }
 
-    if (hasFlamingoReachedEnd && flamingo.position.x > flamingoStartPosition) {
-        flamingo.position.x -= 0.1;
+    if (hasVultureReachedEnd && vulture.position.x > vultureStartPosition) {
+        vulture.position.x -= 0.1;
     }
 
-    if (flamingo.position.x < flamingoStartPosition) {
-        hasFlamingoReachedStart = true;
-        flamingo.rotation.y = 1.5;
+    if (vulture.position.x < vultureStartPosition) {
+        hasVultureReachedStart = true;
+        vulture.rotation.y = 1.5;
     }
 
-    if (hasFlamingoReachedStart && hasFlamingoReachedEnd) {
-        hasFlamingoReachedStart = false;
-        hasFlamingoReachedEnd = false;
+    if (hasVultureReachedStart && hasVultureReachedEnd) {
+        hasVultureReachedStart = false;
+        hasVultureReachedEnd = false;
     }
 }
 
@@ -421,7 +421,7 @@ function render() {
     orbitControls.update();
 
     // Run the animations.
-    animateFlyingFlamingo();
+    animateFlyingVulture();
     const delta = clock.getDelta();
     for (let index = 0; index < animationMixers.length; index++) {
         animationMixers[index].update(delta);
