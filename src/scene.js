@@ -165,7 +165,7 @@ gltfLoader.load("assets/models/billboard.glb", function (gltf) {
 });
 
 var flamingo = null;
-gltfLoader.load('assets/models/Flamingo.glb', function (gltf) {
+gltfLoader.load('assets/models/Vulture.glb', function (gltf) {
     flamingo = gltf.scene.children[0];
 
     const scale = 0.01;
