@@ -30,8 +30,8 @@ const skyBoxScale = 2500,
     floorRepeats = 1000,
     cactusSpreadRadius = 500,
     tumbleWeedSpreadRadius = 500,
-    flamingoStartPosition = -20,
-    flamingoEndPosition = 20,
+    vultureStartPosition = -20,
+    vultureEndPosition = 20,
     hayBaleScale = 0.2,
     zoomMinDistance = 4,
     zoomMaxDistance = 20,
@@ -57,6 +57,7 @@ orbitControls.noKeys = true;
 orbitControls.maxPolarAngle = Math.PI / 2 - 0.15;
 orbitControls.minDistance = zoomMinDistance;
 orbitControls.maxDistance = zoomMaxDistance;
+orbitControls.enablePan = false;
 
 // Add the ground
 const textureSand = textureLoader.load('assets/sand.jpg');
@@ -213,54 +214,76 @@ gltfLoader.load("assets/models/billboard.glb", function (gltf) {
     scene.add(billboard);
 });
 
-// Flamingo creation
-var flamingo = null;
+// Vulture shadow creation
+var vultureShadow = null;
 gltfLoader.load('assets/models/Flamingo.glb', function (gltf) {
-    flamingo = gltf.scene.children[0];
+    vultureShadow = gltf.scene.children[0];
 
     const scale = 0.01;
-    flamingo.scale.set(scale, scale, scale);
-    flamingo.position.x = 3;
-    flamingo.position.y = 6;
-    flamingo.position.z = 5;
-    flamingo.rotation.y = 1.5;
-    flamingo.receiveShadow = true;
-    flamingo.castShadow = true;
-    scene.add(flamingo);
+    vultureShadow.scale.set(scale, scale, scale);
+    vultureShadow.position.x = 3;
+    vultureShadow.position.y = 6;
+    vultureShadow.position.z = 5;
+    vultureShadow.rotation.y = 1.5;
+    vultureShadow.receiveShadow = true;
+    vultureShadow.castShadow = true;
+    scene.add(vultureShadow);
 
-    const mixer = new THREE.AnimationMixer(flamingo);
+    const mixer = new THREE.AnimationMixer(vultureShadow);
     mixer.clipAction(gltf.animations[0]).setDuration(1).play();
     animationMixers.push(mixer);
 });
 
-let hasFlamingoReachedEnd = false, hasFlamingoReachedStart = false;
+// Vulture creation
+var vulture = null;
+gltfLoader.load('assets/models/Vulture.glb', function (gltf) {
+    vulture = gltf.scene.children[0];
 
-function animateFlyingFlamingo() {
-    if (flamingo == null) {
+    const scale = 0.01;
+    vulture.scale.set(scale, scale, scale);
+    vulture.position.x = 3;
+    vulture.position.y = 6;
+    vulture.position.z = 5;
+    vulture.rotation.y = 1.5;
+    scene.add(vulture);
+
+    const mixer2 = new THREE.AnimationMixer(vulture);
+    mixer2.clipAction(gltf.animations[0]).setDuration(1).play();
+    animationMixers.push(mixer2);
+});
+
+let hasVultureReachedEnd = false, hasVultureReachedStart = false;
+
+function animateFlyingVulture() {
+    if (vultureShadow == null) {
         return;
     }
 
-    if (!hasFlamingoReachedEnd && flamingo.position.x < flamingoEndPosition) {
-        flamingo.position.x += 0.1;
+    if (!hasVultureReachedEnd && vultureShadow.position.x < vultureEndPosition) {
+        vultureShadow.position.x += 0.1;
+        vulture.position.x += 0.1;
     }
 
-    if (flamingo.position.x > flamingoEndPosition) {
-        hasFlamingoReachedEnd = true;
-        flamingo.rotation.y = -1.5;
+    if (vultureShadow.position.x > vultureEndPosition) {
+        hasVultureReachedEnd = true;
+        vultureShadow.rotation.y = -1.5;
+        vulture.rotation.y = -1.5;
     }
 
-    if (hasFlamingoReachedEnd && flamingo.position.x > flamingoStartPosition) {
-        flamingo.position.x -= 0.1;
+    if (hasVultureReachedEnd && vultureShadow.position.x > vultureStartPosition) {
+        vultureShadow.position.x -= 0.1;
+        vulture.position.x -= 0.1;
     }
 
-    if (flamingo.position.x < flamingoStartPosition) {
-        hasFlamingoReachedStart = true;
-        flamingo.rotation.y = 1.5;
+    if (vultureShadow.position.x < vultureStartPosition) {
+        hasVultureReachedStart = true;
+        vultureShadow.rotation.y = 1.5;
+        vulture.rotation.y = 1.5;
     }
 
-    if (hasFlamingoReachedStart && hasFlamingoReachedEnd) {
-        hasFlamingoReachedStart = false;
-        hasFlamingoReachedEnd = false;
+    if (hasVultureReachedStart && hasVultureReachedEnd) {
+        hasVultureReachedStart = false;
+        hasVultureReachedEnd = false;
     }
 }
 
@@ -296,9 +319,9 @@ let barrelGeometry = makeBarrel(1, 1.25, 3);
 let barrelMaterial = new THREE.MeshBasicMaterial({
     map: textureLoader.load("assets/GoldenMothChemical.webp")
 });
-createBarrels(-3, -4);
-createBarrels(-4, -4);
-createBarrels(-4, -2.5, 1.5);
+createBarrels(-3, -3);
+createBarrels(-4, 0);
+createBarrels(-4, -1.5, 1.5);
 
 function createBarrels(x, z, rotation = 0) {
     for (let index = 0; index < 3; index++) {
@@ -358,18 +381,23 @@ function addBarrelFloors() {
     barrelMetalFloor.position.x = -3.5;
     barrelMetalFloor.position.z = -0.2;
     scene.add(barrelMetalFloor);
+}
 
-    const lanternMaterial = new THREE.MeshBasicMaterial({
+// Add sun
+addSun();
+
+function addSun() {
+    const sunMaterial = new THREE.MeshBasicMaterial({
         color: 0xffaa00,
         transparent: true,
         blending: THREE.AdditiveBlending
     });
-    const lanternGeometry = new THREE.SphereGeometry(1, 32, 32);
-    const lantern = new THREE.Mesh(lanternGeometry, lanternMaterial);
-    lantern.position.x = -3.5;
-    lantern.position.y = 1;
-    lantern.position.z = 0;
-    scene.add(lantern);
+    const sunGeometry = new THREE.SphereGeometry(20, 32, 32);
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.position.x = -500;
+    sun.position.y = 150;
+    sun.position.z = 500;
+    scene.add(sun);
 }
 
 // Add pyramid
@@ -421,7 +449,7 @@ function render() {
     orbitControls.update();
 
     // Run the animations.
-    animateFlyingFlamingo();
+    animateFlyingVulture();
     const delta = clock.getDelta();
     for (let index = 0; index < animationMixers.length; index++) {
         animationMixers[index].update(delta);
