@@ -1,5 +1,5 @@
-# WebGLNeighborhood
-This is the repository for the visualization of my neighborhood by using the WebGL library.
+# WebGL scene creation
+This is the repository for the visualization of the Breaking Bad scene by using the WebGL library.
 
 ## Running it
 It is recommended to run this application via Xampp. 
