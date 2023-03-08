@@ -1,4 +1,4 @@
-# WebGL scene creation
+# Breaking Bad scene - Using WebGL
 This is the repository for the visualization of the Breaking Bad scene by using the WebGL library.
 
 ## Running it
